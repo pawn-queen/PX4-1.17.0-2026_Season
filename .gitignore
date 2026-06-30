@@ -109,3 +109,19 @@ src/systemcmds/topic_listener/listener_generated.cpp
 # colcon
 log/
 keys/
+
+# 2026 season local artifacts and nested dependency metadata
+__pycache__/
+.pytest_cache/
+.cache/
+*.log
+*.bag
+*.ulg
+*.db3
+*.sqlite3
+**/.git
+**/.github/
+**/.vscode/
+**/.idea/
+**/.gitlab-ci.yml
+**/.dockerignore
