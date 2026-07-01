@@ -1,3 +1,195 @@
+# PX4-1.17.0-2026_Season
+
+## 仓库说明
+
+本仓库是 2026 赛季仿真运行仓库，基于 **PX4 1.17.0** 版本构建。
+
+本仓库采用最新的 PX4 1.17.0 版本作为仿真运行主程序，针对赛季仿真的主要修改集中在 Gazebo 仿真子仓库：
+
+```text
+Tools/simulation/gz
+```
+
+感谢上一赛季仓库对本项目的支持与参考：
+
+```text
+https://github.com/kongpincheng1/PX4-1.15.4-2025_Season.git
+```
+
+---
+
+## 如何获取完整内容
+
+由于本仓库包含 Git 子模块，克隆时请使用 `--recursive` 参数：
+
+```bash
+git clone --recursive git@github.com:pawn-queen/PX4-1.17.0-2026_Season.git
+cd PX4-1.17.0-2026_Season
+git checkout work/px4-v1.17.0
+git submodule update --init --recursive
+```
+
+其余编译、仿真和运行步骤可参考 PX4 官方文档，以及上一赛季仓库：
+
+```text
+https://github.com/kongpincheng1/PX4-1.15.4-2025_Season.git
+```
+
+---
+
+# Gazebo 仿真子模块修改说明
+
+## 1. 背景说明
+
+`Tools/simulation/gz` 是一个独立的 Git 子模块，对应仓库为：
+
+```text
+PX4/PX4-gazebo-models
+```
+
+因此，位于 `Tools/simulation/gz` 目录下的 Gazebo 仿真修改，并不直接属于父仓库 `PX4-1.17.0-2026_Season` 的普通文件修改。
+
+如果希望另一台电脑或另一个克隆仓库能够通过正常的父仓库子模块更新获得这些修改，需要先在该子模块内部完成提交和推送：
+
+```bash
+cd Tools/simulation/gz
+git add .
+git commit -m "Add 2026 season Gazebo models"
+git push
+```
+
+然后再回到父仓库提交子模块指针变化：
+
+```bash
+cd ../../..
+git add Tools/simulation/gz
+git commit -m "Update Gazebo simulation submodule pointer"
+git push
+```
+
+否则，其他克隆仓库只能看到父仓库中记录的旧子模块版本，无法自动获得当前本地的 Gazebo 模型和世界文件修改。
+
+---
+
+## 2. 修改文件说明
+
+当前 `Tools/simulation/gz` 子模块中存在以下本地修改文件：
+
+| 文件路径                         | 修改说明                                                                                        |
+| ---------------------------- | ------------------------------------------------------------------------------------------- |
+| `models/OakD-Lite/model.sdf` | 调整相机传感器姿态，将相机 pitch 方向旋转 `1.570796`；将 RGB 图像尺寸由 `1920x1080` 修改为 `640x480`；同时调整双目/深度相机的位姿参数。 |
+| `models/x500_base/model.sdf` | 为无人机基础机体 link 以及四个旋翼 link 启用风场影响，使仿真中机体和桨叶能够受到风力作用。                                         |
+| `worlds/default.sdf`         | 新增赛季仿真场景配置，包括降落区、GUI/system 插件、小尺寸地面平面、中国区域球面坐标，以及蓝色/黄色目标区域、边界可视化和圆柱障碍物。                    |
+
+---
+
+## 3. 新增模型资源
+
+当前子模块中新增了以下 Gazebo 模型资源：
+
+| 路径                       | 内容说明                                                            |
+| ------------------------ | --------------------------------------------------------------- |
+| `models/cylinder_large`  | 大型圆柱障碍物模型，包含 SDF、config 配置文件以及 `meshes/big.stl` 网格文件。           |
+| `models/cylinder_middle` | 中型圆柱障碍物模型，包含 SDF、config 配置文件以及 `meshes/middle.stl` 网格文件。        |
+| `models/cylinder_small`  | 小型圆柱障碍物模型，包含 SDF、config 配置文件以及 `meshes/small.stl` 网格文件。         |
+| `models/land_zone`       | 降落区模型，包含 SDF、config 配置文件，以及 `landzone.jpg`、`landzone.png` 贴图资源。 |
+
+---
+
+## 4. 重要说明
+
+1. 父仓库分支在记录这些说明之前，已经与远程分支 `origin/work/px4-v1.17.0` 同步。
+
+2. 当前新增的外部依赖以 Git 子模块指针的方式管理，而不是直接复制完整源码树到父仓库中。
+
+3. Gazebo 模型和世界文件的修改目前位于：
+
+   ```text
+   Tools/simulation/gz
+   ```
+
+   也就是 PX4 的 Gazebo 仿真子模块工作区中。
+
+4. 这些修改必须在子模块仓库内部单独提交并推送，否则父仓库无法完整记录这些文件内容。
+
+5. 父仓库中最终记录的是子模块的 commit 指针。只有当子模块本身已经提交并推送后，父仓库再提交新的子模块指针，其他开发者才能通过以下命令正确获取对应的仿真资源：
+
+   ```bash
+   git submodule update --init --recursive
+   ```
+
+---
+
+## 5. 推荐提交流程
+
+### 第一步：进入 Gazebo 子模块
+
+```bash
+cd Tools/simulation/gz
+```
+
+### 第二步：检查子模块修改状态
+
+```bash
+git status
+```
+
+确认修改文件和新增模型资源是否正确。
+
+### 第三步：提交子模块修改
+
+```bash
+git add .
+git commit -m "Add 2026 season Gazebo models"
+```
+
+### 第四步：推送子模块分支
+
+```bash
+git push
+```
+
+如果当前子模块分支还没有设置远程追踪分支，可以使用：
+
+```bash
+git push -u origin 当前分支名
+```
+
+### 第五步：回到父 PX4 仓库
+
+```bash
+cd ../../..
+```
+
+### 第六步：提交子模块指针变化
+
+```bash
+git status
+git add Tools/simulation/gz
+git commit -m "Update Gazebo simulation submodule pointer"
+git push
+```
+
+---
+
+## 6. 克隆后获取方式
+
+其他开发者在克隆父仓库后，应执行：
+
+```bash
+git submodule update --init --recursive
+```
+
+如果已经克隆过仓库，但需要更新子模块到父仓库记录的新版本，应执行：
+
+```bash
+git pull
+git submodule update --init --recursive
+```
+
+这样才能确保 `Tools/simulation/gz` 中的 Gazebo 模型、世界文件和新增资源与当前父仓库记录的子模块版本保持一致。
+
+---
 # PX4 Drone Autopilot
 
 [![Releases](https://img.shields.io/github/release/PX4/PX4-Autopilot.svg)](https://github.com/PX4/PX4-Autopilot/releases) [![DOI](https://zenodo.org/badge/22634/PX4/PX4-Autopilot.svg)](https://zenodo.org/badge/latestdoi/22634/PX4/PX4-Autopilot)
